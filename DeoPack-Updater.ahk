@@ -20,7 +20,7 @@ Gui, Main:Show, w255 h115, DeoPack Updater
 Gui, Update:New
 Gui, Update:+AlwaysOnTop
 
-Actxt := "Downloading Current Version List.."
+Actxt := "Downloading current version list.."
 
 Gui, Update:Add, text, w240 h40 vAct, % Actxt
 Gui, Update:Add, Progress, x10 y35 w235 h20 cGreen vCurrentProgress, 1
@@ -60,7 +60,34 @@ if (Choice == "") {
 	return
 }
 
-Actxt := "Downloading Current Version List.."
+;;Check if DeoPaack exists
+DeoPackLocation := A_AppData "\.minecraft\resourcepacks\" Choice ".zip"
+
+if !FileExist(DeoPackLocation) {
+	MsgBox, 4388, Confirmation, You do not have %Choice%.zip, Do you want to download it?
+IfMsgBox No
+    return
+else
+	Gui, Main:Hide
+	Gui, Update:Show, w255 h65, DeoPack Updater
+	Actxt := "Downloading newest version.."
+	GuiControl, Update:, Act, %Actxt%
+	GuiControl, Update:, CurrentProgress, 10
+	
+	UrlDownloadToFile,https://deocraft.serv.nu/resources/%Choice%.zip, %A_AppData%\.minecraft\resourcepacks\%Choice%.zip
+
+	Actxt := "Done!"
+	GuiControl, Update:, Act, %Actxt%
+	GuiControl, Update:, CurrentProgress, 100
+	
+	sleep 2500
+	
+	Gui, Update:Hide
+	Gui, Main:Show,, DeoPack Updater
+return
+}
+
+Actxt := "Downloading current version list.."
 GuiControl, Update:, Act, %Actxt%
 GuiControl, Update:, CurrentProgress, 1
 
@@ -77,7 +104,7 @@ data := A_ScriptDir "\data\"
 Run PowerShell.exe -NoExit -Command Expand-Archive -LiteralPath '%DeoPack%' -DestinationPath '%data%',, Hide
 
 sleep, 500
-Actxt := "Getting Local Version.."
+Actxt := "Getting local version.."
 GuiControl, Update:, Act, %Actxt%
 GuiControl, Update:, CurrentProgress, +10
 sleep, 500
@@ -121,7 +148,7 @@ if (currentVersion > localVersion) {
 	GuiControl, Update:, Act, %Actxt%
 	GuiControl, Update:, CurrentProgress, +5
 	sleep 2500
-	Actxt := "Downloading new version"
+	Actxt := "Downloading new version.."
 	GuiControl, Update:, Act, %Actxt%
 	GuiControl, Update:, CurrentProgress, +15
 	UrlDownloadToFile,https://deocraft.serv.nu/resources/%Choice%.zip, %A_AppData%\.minecraft\resourcepacks\%Choice%.zip
