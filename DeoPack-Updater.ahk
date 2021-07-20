@@ -101,7 +101,7 @@ GuiControl, Update:, CurrentProgress, +15
 DeoPack := A_AppData "\.minecraft\resourcepacks\" Choice ".zip"
 data := A_ScriptDir "\data\"
 
-Run PowerShell.exe -NoExit -Command Expand-Archive -LiteralPath '%DeoPack%' -DestinationPath '%data%',, Hide
+RunWait PowerShell.exe -Command Expand-Archive -LiteralPath '%DeoPack%' -DestinationPath '%data%',, Hide
 
 sleep, 500
 Actxt := "Getting local version.."
