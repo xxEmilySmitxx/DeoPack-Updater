@@ -87,12 +87,12 @@ return
 
 ChangeDirectory:
 Gui, Settings:Submit, NoHide
+Gui, Settings:+Owndialogs
 
-if (UseDefaultDir) {
-	MsgBox, 4400, Warning, Uncheck 'Use Default Minecraft save directory?' first!
-	return
-}
-FileSelectFolder, CustomDirectory,, 4, Select minecraft's 'resourcepacks' folder
+GuiControl, Settings:, UseDefaultDir, 0
+GuiControl, Settings:, CustomDirectory, %iniCustomDirectory%
+
+FileSelectFolder, CustomDirectory,, 4, Select minecraft's 'resourcepacks' folder`nOnly do this if you changed Minecraft's save directory
 GuiControl, Settings:, CustomDirectory, %CustomDirectory%
 return
 
@@ -131,6 +131,7 @@ return
 
 DiscardSettings:
 SettingsGuiClose:
+Gui, Settings:+Owndialogs
 MsgBox, 4388, Confirmation, Are you sure you want to discard the changes to the settings?
 IfMsgBox No
     return
@@ -154,7 +155,7 @@ return
 GuiClose:
 MainGuiClose:
 UpdateGuiClose:
-
+Gui, +Owndialogs
 MsgBox, 4388, Confirmation, Are you sure you want to exit the DeoPack Updater?
 IfMsgBox No
     return
@@ -171,6 +172,8 @@ Update:
 Gui, Main:Submit, NoHide
 Gui, Settings:Submit
 
+Gui, Main:+Owndialogs
+
 IniRead, iniCustomDirectory, settings.ini, Settings, CustomDirectory
 
 if (UseDefaultDir) {
@@ -180,7 +183,7 @@ if (UseDefaultDir) {
 }
 
 if (DeoPackDirectory == "") {
-	MsgBox, 4400, Warning, Select valid directory!
+	MsgBox, 4400, Warning, Select a valid directory!
 	return
 }
 
