@@ -25,12 +25,12 @@ Simply run the `DeoPack Updater.exe`, select the version you want to update, and
 The program will do the rest!
 
 ## Settings
-**Show NSFW DeoPack versions in dropdown?**
-Shows the DeoPack-_(version)_-NSFW in the dropdown, so you can auto update them as wel.
-**Change Minecraft save directory**
-If you changed Minecraft's save directory, you can select the `resourcepack`s folder in the `.minecraft` folder.
-**Use Default Minecraft save directory?**
-The program will use the default `%appdata%\.minecraft\resourcepacks` folder.
+**Show NSFW DeoPack versions in dropdown?**  
+Shows the DeoPack-_(version)_-NSFW in the dropdown, so you can auto update them as wel.  
+**Change Minecraft save directory**  
+If you changed Minecraft's save directory, you can select the `resourcepacks` folder in the `.minecraft` folder.  
+**Use Default Minecraft save directory?**  
+The program will use the default `%appdata%\.minecraft\resourcepacks` folder.  
 
 _Even if you don't have a certain DeoPack version, you can run the program and install it from there._
 
