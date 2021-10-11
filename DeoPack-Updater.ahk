@@ -2,19 +2,31 @@
 #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#SingleInstance Force
+#SingleInstance Force ;;Only 1 instance of program open, open again and first one closes.
 
-;;Create /data folder if missing
-IfNotExist, data
-	FileCreateDir, data
+;; Internal "Settinges"
+DeoPackUpdaterVersion := 1171.5
+DeoPackVersionList := "DeoPack-1.16.5|DeoPack-1.17"
+DeoPackVersionListFull := "DeoPack-1.16.5|DeoPack-1.17|DeoPack-1.17-NSFW"
 
+DeoCraftURL := "https://deocraft.serv.nu"
+;; End of internal Settings
 
+;; clean and create /data folder
+sleep, 500
+FileRemoveDir, %A_ScriptDir%\data\, 1
+FileCreateDir, %A_ScriptDir%\data\
+
+;;Create settings.ini file if missing
+if !FileExist("settings.ini") {
+	FileAppend, [Settings], settings.ini
+}
 ;;Read Settings on startup
 IniRead, iniAllowNSFW, settings.ini, Settings, AllowNSFW, 0
 if (iniAllowNSFW) {
-DeoPackVersions := "DeoPack-1.16.5|DeoPack-1.17|DeoPack-1.17-NSFW"
+DeoPackVersions := DeoPackVersionListFull
 } else {
-DeoPackVersions := "DeoPack-1.16.5|DeoPack-1.17"
+DeoPackVersions := DeoPackVersionList
 }
 
 IniRead, iniCustomDirectory, settings.ini, Settings, CustomDirectory
@@ -46,8 +58,11 @@ Gui, Settings:Add, Checkbox, Checked%iniAllowNSFW% x20 y25 vAllowNSFW, Show NSFW
 Gui, Settings:Add, Edit, x20 y50 w235 h20 ReadOnly vCustomDirectory, %iniCustomDirectory%
 Gui, Settings:Add, Button, x20 y75 w235 gChangeDirectory, Change Minecraft save directory
 Gui, Settings:Add, Checkbox, Checked%iniUseDefaultDir% x20 y105 vUseDefaultDir gUseDefaultDir, Use Default Minecraft save directory?
-Gui, Settings:Add, Button, Default x160 y135 w100 gSaveSettings, Save Settings
-Gui, Settings:Add, Button, x15 y135 w100 gDiscardSettings, Cancel
+Gui, Settings:Add, GroupBox, x10 y123 w255 h42,
+Gui, Settings:Add, Button, x20 y135 w235 gUpdateDeoPackUpdater, Check for Updates
+Gui, Settings:Add, Button, Default x160 y170 w100 gSaveSettings, Save Settings
+Gui, Settings:Add, Text, x118 y175, v%DeoPackUpdaterVersion%
+Gui, Settings:Add, Button, x15 y170 w100 gDiscardSettings, Cancel
 ;;End of settings Gui
 
 ;;Update Gui
@@ -57,6 +72,10 @@ Gui, Update:Color, FFFFFF
 statusTxt := "Downloading current version list.." ;;Default Status text
 Gui, Update:Add, text, w240 h40 vstatus, % statusTxt
 Gui, Update:Add, Progress, x10 y35 w235 h20 cGreen vCurrentProgress, 1
+Gui, Update:Add, Button, x10 y35 w235 h20 vCloseUpdate gCloseUpdate, Close
+
+GuiControl, Update:Show, CurrentProgress
+GuiControl, Update:Hide, CloseUpdate
 
 ;;End of update Gui
 return
@@ -87,7 +106,7 @@ GuiControl, Settings:, UseDefaultDir, %iniUseDefaultDir%
 ;;End of reading settings
 
 Gui, Main:Hide
-Gui, Settings:Show, w275 h165, DeoPack Updater
+Gui, Settings:Show, w275 h200, DeoPack Updater
 return
 
 ChangeDirectory:
@@ -109,6 +128,85 @@ if (UseDefaultDir) {
 	GuiControl, Settings:, CustomDirectory, %iniCustomDirectory%
 }
 
+return
+
+;; Update DeoPack Updater
+UpdateDeoPackUpdater:
+
+statusTxt := "Downloading current version list.."
+GuiControl, Update:, status, %statusTxt%
+GuiControl, Update:, CurrentProgress, 10
+
+Gui, Main:+Owndialogs
+
+Gui, Main:Hide
+Gui, Settings:Hide
+Gui, Update:Show, w255 h65, DeoPack Updater
+
+
+UrlDownloadToFile, %DeoCraftURL%/resources/DeoPackUpdater-CurrentVersion.ini, %A_ScriptDir%\data\DeoPackUpdater-CurrentVersion.ini
+sleep, 500
+IniRead, CurrentDeoPackUpdaterVersion, %A_ScriptDir%\data\DeoPackUpdater-CurrentVersion.ini, Info, Version
+
+statusTxt := "Checking current version"
+GuiControl, Update:, status, %statusTxt%
+GuiControl, Update:, CurrentProgress, 25
+
+if (CurrentDeoPackUpdaterVersion > DeoPackUpdaterVersion) {
+	
+	statusTxt := "A new DeoPack-Updater version is avalible!`nCurrent version: " CurrentDeoPackUpdaterVersion " Local version: " DeoPackUpdaterVersion
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 35
+	
+	sleep, 2500
+	
+	statusTxt := "Downloading newest version.."
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 45
+	
+	UrlDownloadToFile, %DeoCraftURL%/resources/DeoPack-Updater.zip, %A_ScriptDir%\data\DeoPack-Updater.zip
+	
+	statusTxt := "Installing current version"
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 55
+	
+	RunWait PowerShell.exe -Command Expand-Archive -LiteralPath '%A_ScriptDir%\data\DeoPack-Updater.zip' -DestinationPath '%A_ScriptDir%\data\',, Hide
+	ScriptLocation := A_ScriptDir
+	
+	GuiControl, Update:, CurrentProgress, 70
+	
+	sleep, 500
+	FileMove, %A_ScriptDir%\DeoPack-Updater.exe, %A_ScriptDir%\data\DeoPack Updater\data
+	GuiControl, Update:, CurrentProgress, 85
+	sleep, 250
+	FileMove, %A_ScriptDir%\data\DeoPack Updater\DeoPack-Updater.exe, %A_ScriptDir%\
+	sleep, 500
+	statusTxt := "Done!`nRestarting.."
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 100
+	sleep, 1500
+	Run, %ScriptLocation%\DeoPack-Updater.exe
+} else {
+	sleep, 250
+	statusTxt := "Up-to-date!`n" CurrentDeoPackUpdaterVersion " is the latest version of DeoPack Updater"
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 100
+	FileRemoveDir, %A_ScriptDir%\data\, 1
+	FileCreateDir, %A_ScriptDir%\data\
+	
+	GuiControl, Update:Hide, CurrentProgress
+	GuiControl, Update:Show, CloseUpdate
+	
+Return
+}
+;; End of updating DeoPack Updater
+
+
+CloseUpdate: ;; Closes the Update Window and hides the button again
+	GuiControl, Update:Hide, CloseUpdate
+	GuiControl, Update:Show, CurrentProgress
+	Gui, Update:Hide
+	Gui, Main:Show,, DeoPack Updater
 return
 
 
@@ -150,7 +248,7 @@ return
 ;;Help info
 Help:
 
-run https://deocraft.serv.nu/resources/DeoPack-Updater-Help.html
+run %DeoCraftURL%/resources/DeoPack-Updater-Help.html
 
 return
 
@@ -187,11 +285,10 @@ if (UseDefaultDir) {
 	DeoPackDirectory := iniCustomDirectory
 }
 
-if (DeoPackDirectory == "") {
+if !FileExist(DeoPackDirectory) {
 	MsgBox, 4400, Warning, Select a valid directory!
 	return
 }
-
 
 if (Choice == "") {
 	MsgBox, 4400, Warning, Select a version to update!
@@ -212,16 +309,14 @@ else
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, 10
 	
-	UrlDownloadToFile,https://deocraft.serv.nu/resources/%Choice%.zip, %DeoPackLocation%
+	UrlDownloadToFile,%DeoCraftURL%/resources/%Choice%.zip, %DeoPackLocation%
 
 	statusTxt := "Done!"
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, 100
 	
-	sleep 2500
-	
-	Gui, Update:Hide
-	Gui, Main:Show,, DeoPack Updater
+	GuiControl, Update:Hide, CurrentProgress
+	GuiControl, Update:Show, CloseUpdate
 return
 }
 
@@ -232,7 +327,7 @@ GuiControl, Update:, CurrentProgress, 1
 Gui, Main:Hide
 Gui, Update:Show, w255 h65, DeoPack Updater
 
-UrlDownloadToFile, https://deocraft.serv.nu/resources/%Choice%-infoCurrent.ini, %A_ScriptDir%\data\%Choice%-infoCurrent.ini
+UrlDownloadToFile, %DeoCraftURL%/resources/%Choice%-infoCurrent.ini, %A_ScriptDir%\data\%Choice%-infoCurrent.ini
 
 GuiControl, Update:, CurrentProgress, +15
 
@@ -269,7 +364,7 @@ if (currentVersion > localVersion) {
 	statusTxt := "Downloading new version.."
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, +15
-	UrlDownloadToFile,https://deocraft.serv.nu/resources/%Choice%.zip, %DeoPackLocation%
+	UrlDownloadToFile,%DeoCraftURL%/resources/%Choice%.zip, %DeoPackLocation%
 	
 	
 } Else if (localVersion == "ERROR") {
@@ -281,7 +376,7 @@ if (currentVersion > localVersion) {
 	statusTxt := "Downloading new version.."
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, +15
-	UrlDownloadToFile,https://deocraft.serv.nu/resources/%Choice%.zip, %DeoPackLocation%
+	UrlDownloadToFile,%DeoCraftURL%/resources/%Choice%.zip, %DeoPackLocation%
 
 
 } Else {
@@ -299,9 +394,8 @@ statusTxt := "Done!"
 GuiControl, Update:, status, %statusTxt%
 GuiControl, Update:, CurrentProgress, 100
 
-sleep 2500
-Gui, Update:Hide
-Gui, Main:Show,, DeoPack Updater
+GuiControl, Update:Hide, CurrentProgress
+GuiControl, Update:Show, CloseUpdate
 
 }
 
