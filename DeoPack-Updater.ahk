@@ -5,11 +5,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force ;;Only 1 instance of program open, open again and first one closes.
 
 ;; Internal "Settinges"
-DeoPackUpdaterVersion := 1171.5
+DeoPackUpdaterVersion := 1171.8
 DeoPackVersionList := "DeoPack-1.16.5|DeoPack-1.17"
 DeoPackVersionListFull := "DeoPack-1.16.5|DeoPack-1.17|DeoPack-1.17-NSFW"
 
-DeoCraftURL := "https://deocraft.serv.nu"
+DeoCraftURL := "https://deocraft.net"
 ;; End of internal Settings
 
 ;; clean and create /data folder
@@ -366,6 +366,13 @@ if (currentVersion > localVersion) {
 	GuiControl, Update:, CurrentProgress, +15
 	UrlDownloadToFile,%DeoCraftURL%/resources/%Choice%.zip, %DeoPackLocation%
 	
+	statusTxt := "Succesfully installed newest version!`nDeoPack version "currentVersion
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 100
+
+	GuiControl, Update:Hide, CurrentProgress
+	GuiControl, Update:Show, CloseUpdate
+
 	
 } Else if (localVersion == "ERROR") {
 	statusTxt := "Coudn't find local version`nCurrent version: " currentVersion ", Local version: " localVersion
@@ -373,29 +380,29 @@ if (currentVersion > localVersion) {
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, +5
 	sleep 2500
-	statusTxt := "Downloading new version.."
+	statusTxt := "Downloading newest version.."
 	GuiControl, Update:, status, %statusTxt%
 	GuiControl, Update:, CurrentProgress, +15
 	UrlDownloadToFile,%DeoCraftURL%/resources/%Choice%.zip, %DeoPackLocation%
 
+	statusTxt := "Succesfully installed newest version!`nDeoPack version "currentVersion
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 100
 
+	GuiControl, Update:Hide, CurrentProgress
+	GuiControl, Update:Show, CloseUpdate
 } Else {
-statusTxt := "Up-to-date!"
-GuiControl, Update:, status, %statusTxt%
-GuiControl, Update:, CurrentProgress, +30
+statusTxt := "Up-to-date!`nDeoPack version "currentVersion
+	GuiControl, Update:, status, %statusTxt%
+	GuiControl, Update:, CurrentProgress, 100
+
+	GuiControl, Update:Hide, CurrentProgress
+	GuiControl, Update:Show, CloseUpdate
 sleep 250
 }
 
 FileRemoveDir, %data%, 1
 FileCreateDir, %data%
-
-
-statusTxt := "Done!"
-GuiControl, Update:, status, %statusTxt%
-GuiControl, Update:, CurrentProgress, 100
-
-GuiControl, Update:Hide, CurrentProgress
-GuiControl, Update:Show, CloseUpdate
 
 }
 
