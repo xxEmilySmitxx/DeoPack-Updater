@@ -5,7 +5,7 @@ _The `data` folder contains a placeholder file so that I could upload a folder t
 
 ## Installation
 
-Download the DeoPack Updater [here!](https://deocraft.serv.nu/resources/DeoPack-Updater.zip)  
+Download the DeoPack Updater [here!](https://deocraft.net/resources/DeoPack-Updater.zip)  
 _There is a chance Windows Defender, or another anitvirus, will stop the download because it contains an .exe file.  
 For Windows Defender, you need to allow this download by going to Virus & threat protection, for other antiviruses you have to look (or google) yourself._
 
@@ -38,4 +38,4 @@ _Even if you don't have a certain DeoPack version, you can run the program and i
 
 ## More info
 
-Need help with a problem, or just want to read more? Visit the [Documentation!](https://deocraft.serv.nu/resources/DeoPack-Updater-Help.html)
+Need help with a problem, or just want to read more? Visit the [Documentation!](https://deocraft.net/resources/DeoPack-Updater-Help.html)
