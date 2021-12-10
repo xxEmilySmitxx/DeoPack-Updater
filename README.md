@@ -38,4 +38,4 @@ _Even if you don't have a certain DeoPack version, you can run the program and i
 
 ## More info
 
-Need help with a problem, or just want to read more? Visit the [Documentation!](https://deocraft.net/resources/DeoPack-Updater-Help.html)
+Need help with a problem, or just want to read more? Visit the [Documentation!](https://deocraft.net/resources/DeoPack/DeoPack-Updater-Help.html)
